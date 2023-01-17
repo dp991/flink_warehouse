@@ -25,14 +25,22 @@ public class GmallConfig {
      */
 
     public static final String CLICKHOUSE_URL = "jdbc:clickhouse://127.0.0.1:8123/default";
-    public static final String CLICKHOUSE_DRIVER="ru.yandex.clickhouse.ClickHouseDriver";
+    public static final String CLICKHOUSE_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
     public static final String CLICKHOUSE_USER = "default";
     public static final String CLICKHOUSE_PASSWD = "123456";
 
+    /**
+     * kafka 连接信息
+     */
+
+    public static final String KAFKA_BROKERS = "192.168.120.181:9092";
+    public static final String KAFKA_DEFAULT_TOPIC = "test_topic";
 
 
-
-
+    /**
+     * redis 连接信息
+     */
+    public static final String JEDIS_HOST = "127.0.0.1";
 
 
 }

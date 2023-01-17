@@ -1,5 +1,6 @@
 package org.example.utils;
 
+import org.example.common.GmallConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -10,7 +11,6 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisUtil {
 
     public static JedisPool jedisPool = null;
-    private static String JEDIS_HOST = "127.0.0.1";
 
     public static Jedis getJedis() {
         if (jedisPool == null) {
@@ -22,7 +22,7 @@ public class RedisUtil {
             jedisPoolConfig.setMinIdle(5);
             jedisPoolConfig.setTestOnBorrow(true);
 
-            jedisPool = new JedisPool(jedisPoolConfig, JEDIS_HOST, 6379, 1000);
+            jedisPool = new JedisPool(jedisPoolConfig, GmallConfig.JEDIS_HOST, 6379, 1000);
 
             System.out.println("创建连接池");
             return jedisPool.getResource();

@@ -14,16 +14,14 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.example.bean.TableProcess;
 import org.example.function.CusomerDeserialization;
 import org.example.function.DimSinkFunction;
 import org.example.function.TableProcessFunction;
-import org.example.bean.TableProcess;
 import org.example.utils.MyKafkaUtil;
 
-import javax.annotation.Nullable;
 import java.util.Properties;
 
 /**
