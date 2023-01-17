@@ -33,7 +33,7 @@ public class FlinkCDC {
                 .debeziumProperties(debeziumProperties)
                 .build();
 
-        DataStreamSource<String> streamSource = env.addSource(sourceFunction);
+        DataStreamSource<String> streamSource = env.addSource(sourceFunction).setParallelism(1);//keep message ordering
 
 
         streamSource.print();
