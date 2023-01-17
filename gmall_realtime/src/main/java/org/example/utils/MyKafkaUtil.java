@@ -41,12 +41,12 @@ public class MyKafkaUtil {
 
     /**
      * 动态sink到不同的topic中
-     * todo 待优化
      *
      * @param kafkaSerializationSchema
      * @param <T>
      * @return
      */
+    @Deprecated
     public static <T> FlinkKafkaProducer<T> getKafkaProducer(KafkaSerializationSchema<T> kafkaSerializationSchema) {
 
         Properties properties = new Properties();
