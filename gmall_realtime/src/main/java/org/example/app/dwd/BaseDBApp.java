@@ -7,6 +7,7 @@ import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -85,11 +86,11 @@ public class BaseDBApp {
 
         //数据通过phoenix写入hbase
         hbase.addSink(new DimSinkFunction());
+        //主流数据写入kafka,每条数据可能对应不同的主题 kafka 动态sink到不同的topic中
 
-        //主流数据写入kafka,每条数据可能对应不同的主题
-        kafka.addSink(MyKafkaUtil.getKafkaProducer(new KafkaSerializationSchema<JSONObject>() {
+        kafka.sinkTo(MyKafkaUtil.getKafkaSinkProducer(new KafkaRecordSerializationSchema<JSONObject>() {
             @Override
-            public ProducerRecord<byte[], byte[]> serialize(JSONObject jsonObject, @Nullable Long aLong) {
+            public ProducerRecord<byte[], byte[]> serialize(JSONObject jsonObject, KafkaSinkContext kafkaSinkContext, Long aLong) {
                 return new ProducerRecord<byte[], byte[]>(jsonObject.getString("sinkTable"), jsonObject.getString("after").getBytes());
             }
         }));

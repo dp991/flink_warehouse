@@ -29,20 +29,14 @@ public class MyKafkaUtil {
     /**
      * todo flink 1.14 kafka 动态sink到不同的topic中
      *
-     * @param kafkaSerializationSchema
      * @return
      */
-    public static KafkaSink<String> getKafkaProducer2(KafkaSerializationSchema<String> kafkaSerializationSchema) {
+    public static <T> KafkaSink<T> getKafkaSinkProducer(KafkaRecordSerializationSchema<T> kafkaSerializationSchema) {
 
-        KafkaSink.<String>builder()
+        return KafkaSink.<T>builder()
                 .setBootstrapServers(brokers)
-                .setRecordSerializer(KafkaRecordSerializationSchema.<String>builder()
-                        .setValueSerializationSchema(new SimpleStringSchema())
-                        .build())
+                .setRecordSerializer(kafkaSerializationSchema)
                 .build();
-
-        return null;
-
     }
 
     /**
@@ -67,7 +61,7 @@ public class MyKafkaUtil {
                 .setBootstrapServers(brokers)
                 .setTopics(topic)
                 .setGroupId(groupId)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
     }
