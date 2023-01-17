@@ -21,7 +21,7 @@ import java.sql.SQLException;
  */
 public class ClickHouseUtil {
 
-    public static <T> SinkFunction<T> getSinkFunction(String sql) {
+    public static <T> SinkFunction<T> getSinkFunction(String sql,int batchSize) {
 
         return JdbcSink.<T>sink(
                 sql,
@@ -65,7 +65,7 @@ public class ClickHouseUtil {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(20).build(),
+                        .withBatchSize(batchSize).build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withDriverName(GmallConfig.CLICKHOUSE_DRIVER)
                         .withUrl(GmallConfig.CLICKHOUSE_URL)

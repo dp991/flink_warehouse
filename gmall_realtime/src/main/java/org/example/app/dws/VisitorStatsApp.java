@@ -149,7 +149,7 @@ public class VisitorStatsApp {
         resultDS.print("resultDS");
         //将数据写入ck
         String sql = "insert into default.visitor_stats(stt,edt,vc,ch,ar,is_new,uv_ct,pv_ct,sv_ct,uj_ct,dur_sum,ts) values(?,?,?,?,?,?,?,?,?,?,?,?)";
-        resultDS.addSink(ClickHouseUtil.getSinkFunction(sql));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction(sql,20));
 
 
         env.execute("VisitorStatusApp");

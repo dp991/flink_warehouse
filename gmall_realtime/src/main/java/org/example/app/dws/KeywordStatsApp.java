@@ -75,7 +75,7 @@ public class KeywordStatsApp {
 
         //打印输出到clickhouse
         dataStream.print();
-        dataStream.addSink(ClickHouseUtil.getSinkFunction("insert into default.keyword_stats(keyword,ct,source,stt,edt,ts) values(?,?,?,?,?,?)"));
+        dataStream.addSink(ClickHouseUtil.getSinkFunction("insert into default.keyword_stats(keyword,ct,source,stt,edt,ts) values(?,?,?,?,?,?)",20));
 
         //执行
         env.execute("KeywordStatsApp");

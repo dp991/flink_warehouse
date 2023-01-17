@@ -65,7 +65,7 @@ public class ProvinceStatsApp {
         dataStream.print();
 
         //打印数据并写入clickhouse
-        dataStream.addSink(ClickHouseUtil.getSinkFunction("insert into default.province_stats values(?,?,?,?,?,?,?,?,?,?)"));
+        dataStream.addSink(ClickHouseUtil.getSinkFunction("insert into default.province_stats values(?,?,?,?,?,?,?,?,?,?)",20));
 
         //执行任务
         env.execute("ProvinceStatsApp");

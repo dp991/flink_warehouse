@@ -306,7 +306,7 @@ public class ProductStatsApp {
         productStatsWithTMDS.addSink(ClickHouseUtil.getSinkFunction("insert into default.product_stats(" +
                 "stt,edt,sku_id,sku_name,sku_price,spu_id,spu_name,tm_id,tm_name,category3_id,category3_name,display_ct,click_ct,favor_ct,cart_ct,order_sku_num,order_amount,order_ct,payment_amount" +
                 ",paid_order_ct,refund_order_ct,refund_amount,commnt_ct,good_comment_ct,ts) values " +
-                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",20));
 
         env.execute("ProductStatsApp");
     }
