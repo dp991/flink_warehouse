@@ -12,7 +12,13 @@ public class RedisUtil {
 
     public static JedisPool jedisPool = null;
 
+    /**
+     * redis 连接池
+     *
+     * @return
+     */
     public static Jedis getJedis() {
+
         if (jedisPool == null) {
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
             jedisPoolConfig.setMaxTotal(100);
@@ -22,10 +28,10 @@ public class RedisUtil {
             jedisPoolConfig.setMinIdle(5);
             jedisPoolConfig.setTestOnBorrow(true);
 
-            jedisPool = new JedisPool(jedisPoolConfig, GmallConfig.JEDIS_HOST, 6379, 1000);
+            jedisPool = new JedisPool(jedisPoolConfig, GmallConfig.JEDIS_HOST, GmallConfig.JEDIS_PORT, GmallConfig.TIME_OUT);
 
-            System.out.println("创建连接池");
             return jedisPool.getResource();
+
         } else {
 //            System.out.println(" 连接池活跃连接数：" + jedisPool.getNumActive());
             return jedisPool.getResource();

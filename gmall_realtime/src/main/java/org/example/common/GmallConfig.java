@@ -41,6 +41,8 @@ public class GmallConfig {
      * redis 连接信息
      */
     public static final String JEDIS_HOST = "127.0.0.1";
+    public static final int JEDIS_PORT = 6379;
+    public static final Integer TIME_OUT = 1000;
 
 
 }
