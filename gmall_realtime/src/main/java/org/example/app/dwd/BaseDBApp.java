@@ -86,8 +86,8 @@ public class BaseDBApp {
 
         //数据通过phoenix写入hbase
         hbase.addSink(new DimSinkFunction());
-        //主流数据写入kafka,每条数据可能对应不同的主题 kafka 动态sink到不同的topic中
 
+        //主流数据写入kafka,每条数据可能对应不同的主题 kafka 动态sink到不同的topic中
         kafka.sinkTo(MyKafkaUtil.getKafkaSinkProducer(new KafkaRecordSerializationSchema<JSONObject>() {
             @Override
             public ProducerRecord<byte[], byte[]> serialize(JSONObject jsonObject, KafkaSinkContext kafkaSinkContext, Long aLong) {
