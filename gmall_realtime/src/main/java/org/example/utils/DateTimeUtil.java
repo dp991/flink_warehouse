@@ -2,6 +2,7 @@ package org.example.utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -21,5 +22,10 @@ public class DateTimeUtil {
         //        LocalDateTime local = LocalDateTime.parse(YmDHms, formatter);
 //        return localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
         return Long.valueOf(YmDHms);
+    }
+
+    public static Long YmDHmstoTs(String YmDHms) {
+        LocalDateTime local = LocalDateTime.parse(YmDHms, formatter);
+        return local.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 }

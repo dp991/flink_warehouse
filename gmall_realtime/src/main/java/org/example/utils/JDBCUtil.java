@@ -59,4 +59,20 @@ public class JDBCUtil {
         return resultList;
     }
 
+
+    /**
+     * 通用插入语句
+     * @param connection
+     * @param sql
+     * @param clz
+     * @param underScoreToCamel
+     * @return
+     * @param <T>
+     * @throws Exception
+     */
+    public static <T> List<T> insert(Connection connection, String sql, Class<T> clz, boolean underScoreToCamel) throws Exception {
+
+        return null;
+    }
+
 }

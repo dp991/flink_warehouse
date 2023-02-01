@@ -59,7 +59,7 @@ public class MyKafkaUtil {
                 .setBootstrapServers(GmallConfig.KAFKA_BROKERS)
                 .setTopics(topic)
                 .setGroupId(groupId)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
     }
