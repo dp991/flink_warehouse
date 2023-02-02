@@ -16,7 +16,7 @@ import org.example.utils.DateTimeUtil;
 import org.example.utils.MyKafkaUtil;
 import org.traffic.bean.CarInfo;
 import org.traffic.bean.MonitorAvgSpeedInfo;
-import org.traffic.util.CommonJDBCSink;
+import org.traffic.util.JDBCSink;
 
 import java.time.Duration;
 
@@ -34,7 +34,6 @@ public class MonitorAvgSpeed {
         String groupId = "traffic_monoitor_app";
         DataStreamSource<String> kafkaDS = env.fromSource(MyKafkaUtil.getKafkaConsumer(sourceTopic, groupId), WatermarkStrategy.noWatermarks(), "traffic_monoitor_app");
 
-//        DataStreamSource<String> kafkaDS = env.socketTextStream("127.0.0.1", 9999);
         SingleOutputStreamOperator<CarInfo> MonitorCarDS = kafkaDS.map(line -> {
             String[] arr = line.split("\t");
             return new CarInfo(
@@ -90,7 +89,7 @@ public class MonitorAvgSpeed {
 
         //保存到数据库
         String sql = "insert into t_average_speed(start_time, end_time,monitor_id,avg_speed,car_count) values(?,?,?,?,?)";
-        avgSpeedDS.addSink(new CommonJDBCSink<MonitorAvgSpeedInfo>(sql));
+        avgSpeedDS.addSink(JDBCSink.mysqlSinkFunction(sql,1000));
 
         env.execute("MonitorAvgSpeed");
     }

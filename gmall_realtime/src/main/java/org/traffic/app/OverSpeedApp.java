@@ -18,7 +18,7 @@ import org.traffic.bean.CarInfo;
 import org.traffic.bean.OverSpeedInfo;
 import org.traffic.bean.SpeedLimitInfo;
 import org.traffic.common.TrafficConfig;
-import org.traffic.util.CommonJDBCSink;
+import org.traffic.util.JDBCSink;
 
 import java.sql.*;
 
@@ -151,7 +151,7 @@ public class OverSpeedApp {
 
         //将结果写入mysql表
         String sql = "insert into  t_overspeed_info(car_id,monitor_id,road_id,real_speed,limit_speed,action_time) values(?,?,?,?,?,?)";
-        process.addSink(new CommonJDBCSink<OverSpeedInfo>(sql));
+        process.addSink(JDBCSink.mysqlSinkFunction(sql,100));
 
 
         env.execute("OverSpeedApp");

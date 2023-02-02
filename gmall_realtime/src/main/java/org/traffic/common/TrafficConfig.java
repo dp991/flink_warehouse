@@ -2,13 +2,6 @@ package org.traffic.common;
 
 public class TrafficConfig {
 
-    /**
-     * phoenix连接信息
-     */
-    public static final String HBASE_SCHEMA = "GMALL_REALTIME";
-    public static final String PHONEIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
-    public static final String PHOENIX_SERVER = "jdbc:phoenix:172.25.92.6:2181";
-
 
     /**
      * mysql 连接信息
