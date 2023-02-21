@@ -27,6 +27,11 @@ import java.util.Map;
 
 /**
  * 危险驾驶：在5分钟内，连续经过3个卡口且超速行驶即为危险驾驶
+ * CEP复杂事件编程步骤：
+ *  1、创建流
+ *  2、定义模式
+ *  3、事件流应用于模式
+ *  4、选择事件
  */
 public class DangerDriveApp {
     public static void main(String[] args) throws Exception {
@@ -53,7 +58,7 @@ public class DangerDriveApp {
                     }
                 }));
 
-        //数据过滤，找出超速数据
+        //todo 待优化
         SingleOutputStreamOperator<LimitCarInfo> overSpeedCarInfo = transferDS.map(new RichMapFunction<CarInfo, LimitCarInfo>() {
             Connection connection;
             PreparedStatement pstmt;
@@ -134,6 +139,7 @@ public class DangerDriveApp {
         });
 
         rsDS.print();
+        //todo sink到数据库
 
 
         env.execute("DangerDriveApp");
