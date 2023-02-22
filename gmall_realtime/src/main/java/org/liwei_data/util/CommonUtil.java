@@ -2,16 +2,21 @@ package org.liwei_data.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.util.EntityUtils;
+import org.liwei_data.bean.SightInfo;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+@Slf4j
 public class CommonUtil {
 
     public static String getRankClass(String rank) {
@@ -107,6 +112,41 @@ public class CommonUtil {
         return address.replaceAll(" ", "");
     }
 
+    public static void getRequest(SightInfo sightInfo, String newAddress) throws Exception {
+        String url = "https://apis.map.qq.com/jsapi?qt=geoc&addr=%s&key=TU5BZ-MKD3W-L43RW-O3ZBW-GWMZK-QBB25&output=jsonp&pf=jsapi&ref=jsapi";
+        String xyURL = String.format(url, newAddress);
+        kong.unirest.HttpResponse<String> response = null;
+        try {
+            Thread.sleep(1000);
+            response = Unirest.get(xyURL)
+                    .asString();
+        } catch (UnirestException e) {
+            log.error("Unirest error: {}", xyURL);
+            throw e;
+        }
+
+        if (response != null && response.getStatus() == 200) {
+            JSONObject jsonObject = JSON.parseObject(response.getBody());
+            JSONObject detail = jsonObject.getJSONObject("detail");
+            if (detail != null) {
+                String province = detail.getString("province");
+                String adcode = detail.getString("adcode");
+                String city = detail.getString("city");
+                Double x = detail.getDouble("pointx");
+                Double y = detail.getDouble("pointy");
+                String district = detail.getString("district");
+                String town = detail.getString("town");
+                //实体类信息初始化
+                sightInfo.setCity(city);
+                sightInfo.setLon(x);
+                sightInfo.setLat(y);
+                sightInfo.setProvince(province);
+                sightInfo.setAdcode(adcode);
+                sightInfo.setDistrict(district);
+                sightInfo.setTown(town);
+            }
+        }
+    }
 
     public static CompletableFuture<Tuple2<Double, Double>> getLonAndLat(CloseableHttpAsyncClient client, String newAddress) {
         String xyUrl = String.format("https://apis.map.qq.com/jsapi?qt=geoc&addr=%s&key=TU5BZ-MKD3W-L43RW-O3ZBW-GWMZK-QBB25&output=jsonp&pf=jsapi&ref=jsapi&cb=qq.maps._svcb3.geocoder0", newAddress);

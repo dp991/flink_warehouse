@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SightInfo {
+    private String province;
     private String city;
+    private String adcode;
+    private String district;
+    private String town;
     private String name;
     private String rank_class;
     private Double heat_score;

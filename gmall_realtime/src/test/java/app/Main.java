@@ -1,5 +1,6 @@
 package app;
 
+import org.apache.commons.lang3.StringUtils;
 import org.liwei_data.util.CommonUtil;
 
 import java.util.regex.Matcher;
@@ -13,11 +14,20 @@ public class Main {
 //
 //        System.out.println(xyUrl);
         String city="杭州";
-        String address="杭州市拱墅区东文街90号（新天地园区内）新天地太阳剧场";
-        String newAddress1 = CommonUtil.getAddress(city, address);
-        String regExp="[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；\r\t：”“’。， 、？]";
-        String newAddress = newAddress1.replace(" ", "").replaceAll(regExp,"");
-        System.out.println(newAddress);
+        String address="";
+//        String url = "https://apis.map.qq.com/jsapi?qt=geoc&addr=%s&key=TU5BZ-MKD3W-L43RW-O3ZBW-GWMZK-QBB25&output=jsonp&pf=jsapi&ref=jsapi";
+//        String regExp = "[\n`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；\r\t：”“’。， 、？]";
+//        String newAddress = address
+//                .replace(" ", "")
+//                .replace(" ", "")
+//                .replaceAll(regExp, "")
+//                .replace(" ", "")
+//                .replaceAll("\"", "");
+//        String xyURL = String.format(url, newAddress);
+//        System.out.println(newAddress);
+        if (StringUtils.isAnyBlank(city,address)){
+            System.out.println("blank");
+        }
     }
 }
 

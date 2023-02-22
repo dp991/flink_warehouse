@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ververica.cdc.connectors.mysql.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -25,11 +24,12 @@ import java.util.Properties;
 /**
  * 业务数据ods
  */
+@Slf4j
 public class FlinkCDC {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(5);
+        env.setParallelism(2);
 
         Properties debeziumProperties = new Properties();
         debeziumProperties.put("snapshot.locking.mode", "none");// do not use lock
@@ -43,7 +43,7 @@ public class FlinkCDC {
                 .databaseList("liwei_base")
                 .tableList("liwei_base.xc_sight_info")
                 .deserializer(new CusomerDeserialization())
-                .startupOptions(StartupOptions.latest()) //initial()
+                .startupOptions(StartupOptions.initial()) //initial()
                 .debeziumProperties(debeziumProperties)
                 .build();
 
@@ -61,6 +61,10 @@ public class FlinkCDC {
             after.put("name", CommonUtil.nameExcludeRankInfo(name));
             after.put("comment_count", CommonUtil.getCommentCount(comment_count));
             after.put("comment_score", CommonUtil.getCommentScore(comment_score));
+            after.put("province", "");
+            after.put("adcode", "");
+            after.put("district", "");
+            after.put("town", "");
             after.put("rank_info", rank_class);
             after.put("lon", 0.0);
             after.put("lat", 0.0);
@@ -76,7 +80,6 @@ public class FlinkCDC {
                 jedis = RedisUtil.getJedis();
             }
 
-            String url = "https://apis.map.qq.com/jsapi?qt=geoc&addr=%s&key=TU5BZ-MKD3W-L43RW-O3ZBW-GWMZK-QBB25&output=jsonp&pf=jsapi&ref=jsapi";
 
             @Override
             public SightInfo map(SightInfo sightInfo) throws Exception {
@@ -92,45 +95,30 @@ public class FlinkCDC {
                         .replaceAll(regExp, "")
                         .replace(" ", "")
                         .replaceAll("\"", "");
-                String xyURL = String.format(url, newAddress);
+
                 String key = "Flink_" + city + "_" + name + "_" + newAddress;
                 if (jedis.get(key) == null) {
-                    Double x = 0.0;
-                    Double y = 0.0;
                     try {
-                        Thread.sleep(800);
-                        // todo 可以使用异步请求
-                        HttpResponse<String> response = Unirest.get(xyURL)
-                                .asString();
-                        if (response.getStatus() == 200) {
-                            JSONObject jsonObject = JSON.parseObject(response.getBody());
-                            JSONObject detail = jsonObject.getJSONObject("detail");
-                            if (detail != null) {
-                                x = detail.getDouble("pointx");
-                                y = detail.getDouble("pointy");
-                            }
+                        CommonUtil.getRequest(sightInfo, newAddress);
+                        if (sightInfo.getLon() == null || sightInfo.getLon() == 0 || sightInfo.getLon() == 0.0) {
+                            newAddress = city + "市" + newAddress;
+                            log.error("getRequest 第二次尝试,address: {}", newAddress);
+                            CommonUtil.getRequest(sightInfo, newAddress);
+                        } else {
+                            //key加入到redis中
+                            jedis.set(key, sightInfo.getLon() + "::" + sightInfo.getLat());
                         }
                     } catch (Exception e) {
-                        System.out.println("address: " + sightInfo.getAddress());
-                        System.out.println(e.getMessage());
+                        log.error(e.getMessage());
                     }
-                    sightInfo.setLon(x);
-                    sightInfo.setLat(y);
-                    jedis.set(key, x + "," + y);
-                } else {
-                    String xAndY = jedis.get(key);
-                    String[] split = xAndY.split(",");
-                    sightInfo.setLon(Double.valueOf(split[0]));
-                    sightInfo.setLat(Double.valueOf(split[1]));
                 }
                 return sightInfo;
             }
-        });
+        }).filter(s -> s.getLat() != null && s.getLon() != 0.0);
 
-        String sql = "replace into sight_info_final(city,name,rank_class,heat_score,comment_score,comment_count,rank_info,address,open_info,phone,lon,lat) values(?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "replace into sight_info(province,city,adcode,district,town,name,rank_class,heat_score,comment_score,comment_count,rank_info,address,open_info,phone,lon,lat) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         Integer batchSize = 100;
         mapDS.addSink(JDBCSink.mysqlSinkFunction(sql, batchSize));
-
 
         env.execute("FlinkCDC");
 
