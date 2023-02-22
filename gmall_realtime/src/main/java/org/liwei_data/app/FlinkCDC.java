@@ -72,14 +72,12 @@ public class FlinkCDC {
         });
 
         SingleOutputStreamOperator<SightInfo> mapDS = sightDS.map(new RichMapFunction<SightInfo, SightInfo>() {
-
             private transient Jedis jedis;
 
             @Override
             public void open(Configuration parameters) throws Exception {
                 jedis = RedisUtil.getJedis();
             }
-
 
             @Override
             public SightInfo map(SightInfo sightInfo) throws Exception {
@@ -102,7 +100,7 @@ public class FlinkCDC {
                         CommonUtil.getRequest(sightInfo, newAddress);
                         if (sightInfo.getLon() == null || sightInfo.getLon() == 0 || sightInfo.getLon() == 0.0) {
                             newAddress = city + "市" + newAddress;
-                            log.error("getRequest 第二次尝试,address: {}", newAddress);
+                            log.error("getRequest 第二次尝试,key={},address: {}", key, newAddress);
                             CommonUtil.getRequest(sightInfo, newAddress);
                         } else {
                             //key加入到redis中

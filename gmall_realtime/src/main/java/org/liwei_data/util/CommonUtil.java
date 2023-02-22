@@ -136,6 +136,7 @@ public class CommonUtil {
                 Double y = detail.getDouble("pointy");
                 String district = detail.getString("district");
                 String town = detail.getString("town");
+                String analysisAddress = detail.getString("analysis_address");
                 //实体类信息初始化
                 sightInfo.setCity(city);
                 sightInfo.setLon(x);
@@ -144,6 +145,7 @@ public class CommonUtil {
                 sightInfo.setAdcode(adcode);
                 sightInfo.setDistrict(district);
                 sightInfo.setTown(town);
+                sightInfo.setAddress(analysisAddress);
             }
         }
     }
