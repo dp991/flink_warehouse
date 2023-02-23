@@ -33,6 +33,7 @@ public class FlinkCDC {
 
         Properties debeziumProperties = new Properties();
         debeziumProperties.put("snapshot.locking.mode", "none");// do not use lock
+//        debeziumProperties.put("snapshot.mode", "initial");// do not use lock
         debeziumProperties.put("debezium.inconsistent.schema.handling.mode", "warn");
 
         SourceFunction<String> sourceFunction = MySqlSource.<String>builder()
@@ -43,7 +44,7 @@ public class FlinkCDC {
                 .databaseList("liwei_base")
                 .tableList("liwei_base.xc_sight_info")
                 .deserializer(new CusomerDeserialization())
-                .startupOptions(StartupOptions.initial()) //initial()
+                .startupOptions(StartupOptions.initial()) //initial() 应该从时间戳为：2023-02-22 16:03:04
                 .debeziumProperties(debeziumProperties)
                 .build();
 
@@ -97,25 +98,31 @@ public class FlinkCDC {
                 String key = "Flink_" + city + "_" + name + "_" + newAddress;
                 if (jedis.get(key) == null) {
                     try {
+                        //经纬度进行赋值
                         CommonUtil.getRequest(sightInfo, newAddress);
                         if (sightInfo.getLon() == null || sightInfo.getLon() == 0 || sightInfo.getLon() == 0.0) {
                             newAddress = city + "市" + newAddress;
                             log.error("getRequest 第二次尝试,key={},address: {}", key, newAddress);
                             CommonUtil.getRequest(sightInfo, newAddress);
-                        } else {
+                        }
+
+                        if (sightInfo.getLon() != null && sightInfo.getLon() > 0.0) {
                             //key加入到redis中
                             jedis.set(key, sightInfo.getLon() + "::" + sightInfo.getLat());
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }
+                } else {
+                    log.warn("redis 中已存在 key:{}", key);
+                    return null;
                 }
                 return sightInfo;
             }
-        }).filter(s -> s.getLat() != null && s.getLon() != 0.0);
+        }).filter(s -> s != null && s.getLat() != null && s.getLon() != 0.0);
 
         String sql = "replace into sight_info(province,city,adcode,district,town,name,rank_class,heat_score,comment_score,comment_count,rank_info,address,open_info,phone,lon,lat) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        Integer batchSize = 100;
+        Integer batchSize = 10;
         mapDS.addSink(JDBCSink.mysqlSinkFunction(sql, batchSize));
 
         env.execute("FlinkCDC");

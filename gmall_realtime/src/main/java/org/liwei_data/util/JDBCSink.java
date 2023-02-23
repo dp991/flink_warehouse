@@ -62,12 +62,15 @@ public class JDBCSink {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(batchSize).build(),
+                        .withBatchSize(batchSize)
+                        .withBatchIntervalMs(200)
+                        .withMaxRetries(2)
+                        .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withDriverName(Config.MYSQL_DRIVER_NAME)
-                        .withUrl(Config.MYSQL_URL)
-                        .withUsername(Config.MYSQL_USER)
-                        .withPassword(Config.MYSQL_PASSWORD)
+                        .withDriverName(Config.REMOTE_MYSQL_DRIVER_NAME)
+                        .withUrl(Config.REMOTE_MYSQL_URL)
+                        .withUsername(Config.REMOTE_MYSQL_USER)
+                        .withPassword(Config.REMOTE_MYSQL_PASSWORD)
                         .build());
     }
 }
