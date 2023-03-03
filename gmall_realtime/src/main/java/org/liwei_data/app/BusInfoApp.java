@@ -90,6 +90,7 @@ public class BusInfoApp {
                 String city = bus.getCity();
                 String stationName = bus.getStation_name().trim();
                 String lineName = bus.getLine_name();
+                String forward = bus.getForward();
 
                 if (!stationName.contains("公交站")) {
                     stationName = stationName + "公交站";
@@ -97,7 +98,8 @@ public class BusInfoApp {
                 String address = city + stationName;
                 bus.setAddress(address);
 
-                String key = "Flink_" + city + "_" + lineName + "_" + stationName;
+                String key = city + "_" + lineName + "_" + forward + "_" + stationName;
+
                 if (jedis.get(key) == null) {
                     try {
                         //经纬度进行赋值
@@ -122,7 +124,7 @@ public class BusInfoApp {
                 } else {
                     String rs = jedis.get(key);
                     String[] arr = jedis.get(key).split("::");
-                    System.out.println("redis key 已存在：" + rs);
+                    System.out.println("redis key 已存在：key = " + key + " , value = " + rs);
                     bus.setCity(arr[3]);
                     bus.setLon(Double.valueOf(arr[0]));
                     bus.setLat(Double.valueOf(arr[1]));
