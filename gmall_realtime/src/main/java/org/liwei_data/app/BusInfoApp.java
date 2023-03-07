@@ -44,7 +44,7 @@ public class BusInfoApp {
                 .databaseList("liwei_base")
                 .tableList("liwei_base.bus_8684")
                 .deserializer(new CusomerDeserialization())
-                .startupOptions(StartupOptions.initial()) //initial()
+                .startupOptions(StartupOptions.latest()) //initial()
                 .debeziumProperties(debeziumProperties)
                 .build();
 
@@ -59,7 +59,12 @@ public class BusInfoApp {
             String price = after.getString("price");
             String company = after.getString("company");
             after.put("price_info", price);
-            after.put("company", company.replace("公交公司：", "").trim());
+            if (company != null){
+                after.put("company", company.replace("公交公司：", "").trim());
+            }else {
+                after.put("company", "");
+            }
+
 
             after.put("bus_line_name", after.getString("bus_name"));
 
@@ -96,51 +101,55 @@ public class BusInfoApp {
                     stationName = stationName + "公交站";
                 }
                 String address = city + stationName;
-                bus.setAddress(address);
+                bus.setAddress(address.trim());
 
                 String key = city + "_" + lineName + "_" + forward + "_" + stationName;
 
-                if (jedis.get(key) == null) {
-                    try {
-                        //经纬度进行赋值
-                        CommonUtil.getRequest(bus, address);
-                        if (bus.getLon() == null || bus.getLon() == 0 || bus.getLon() == 0.0) {
-                            log.error("getRequest 第二次尝试,key={},address: {}", key, stationName);
-                            CommonUtil.getRequest(bus, city + "市" + stationName);
-                        }
-
-                        if (bus.getLon() != null && bus.getLon() > 0.0) {
-                            //key加入到redis中
-                            if (bus.getAddress() == null || bus.getAddress().length() == 0) {
-                                jedis.set(key, bus.getLon() + "::" + bus.getLat() + "::" + bus.getProvince() + "::" + bus.getCity() + "::" + bus.getAdcode() + "::" + bus.getDistrict() + "::" + bus.getTown() + "::" + address);
-                                bus.setAddress(address);
-                            } else {
-                                jedis.set(key, bus.getLon() + "::" + bus.getLat() + "::" + bus.getProvince() + "::" + bus.getCity() + "::" + bus.getAdcode() + "::" + bus.getDistrict() + "::" + bus.getTown() + "::" + bus.getAddress());
+                if (address.trim().length() > 0) {
+                    if (jedis.get(key) == null) {
+                        try {
+                            //经纬度进行赋值
+                            CommonUtil.getRequest(bus, address);
+                            if (bus.getLon() == null || bus.getLon() == 0 || bus.getLon() == 0.0) {
+                                log.error("getRequest 第二次尝试,key={},address: {}", key, stationName);
+                                CommonUtil.getRequest(bus, city + "市" + stationName);
                             }
+
+                            if (bus.getLon() != null && bus.getLon() > 0.0) {
+                                //key加入到redis中
+                                if (bus.getAddress() == null || bus.getAddress().length() == 0) {
+                                    jedis.set(key, bus.getLon() + "::" + bus.getLat() + "::" + bus.getProvince() + "::" + bus.getCity() + "::" + bus.getAdcode() + "::" + bus.getDistrict() + "::" + bus.getTown() + "::" + address);
+                                    bus.setAddress(address);
+                                } else {
+                                    jedis.set(key, bus.getLon() + "::" + bus.getLat() + "::" + bus.getProvince() + "::" + bus.getCity() + "::" + bus.getAdcode() + "::" + bus.getDistrict() + "::" + bus.getTown() + "::" + bus.getAddress());
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error(e.getMessage());
                         }
-                    } catch (Exception e) {
-                        log.error(e.getMessage());
+                    } else {
+//                    String rs = jedis.get(key);
+//                    String[] arr = jedis.get(key).split("::");
+//                    System.out.println("redis key 已存在：key = " + key + " , value = " + rs);
+//                    bus.setCity(arr[3]);
+//                    bus.setLon(Double.valueOf(arr[0]));
+//                    bus.setLat(Double.valueOf(arr[1]));
+//                    bus.setProvince(arr[2]);
+//                    bus.setAdcode(arr[4]);
+//                    bus.setDistrict(arr[5]);
+//                    bus.setTown(arr[6]);
+//                    bus.setAddress(arr[7]);
+                        return null;
                     }
                 } else {
-                    String rs = jedis.get(key);
-                    String[] arr = jedis.get(key).split("::");
-                    System.out.println("redis key 已存在：key = " + key + " , value = " + rs);
-                    bus.setCity(arr[3]);
-                    bus.setLon(Double.valueOf(arr[0]));
-                    bus.setLat(Double.valueOf(arr[1]));
-                    bus.setProvince(arr[2]);
-                    bus.setAdcode(arr[4]);
-                    bus.setDistrict(arr[5]);
-                    bus.setTown(arr[6]);
-                    bus.setAddress(arr[7]);
-                    return bus;
+                    return null;
                 }
                 return bus;
             }
         }).filter(s -> s != null && s.getLat() != null && s.getLon() != 0.0);
 //
         String sql = "insert into bus_station_info(province,city,adcode,district,town,line_name,bus_line_name,forward,station_name,address,run_time,run_time_desc,company,price_info,station_id,lon,lat) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        Integer batchSize = 10;
+        Integer batchSize = 500;
         mapDS.addSink(JDBCSink.mysqlSinkFunction(sql, batchSize));
 
         env.execute("FlinkCDC");

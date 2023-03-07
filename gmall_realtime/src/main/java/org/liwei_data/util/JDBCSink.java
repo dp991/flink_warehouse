@@ -63,7 +63,7 @@ public class JDBCSink {
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(batchSize)
-                        .withBatchIntervalMs(1000)
+                        .withBatchIntervalMs(5000)
                         .withMaxRetries(2)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()

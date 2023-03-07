@@ -186,7 +186,7 @@ public class CommonUtil {
             response = Unirest.get(xyURL)
                     .asString();
         } catch (UnirestException e) {
-            log.error("Unirest error: {}", xyURL);
+            log.error("Unirest error: {},{}", xyURL,bus.toString());
             throw e;
         }
 
